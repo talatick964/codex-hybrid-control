@@ -33,7 +33,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
 APP_TITLE = "Codex Hybrid Control — Центр управления"
-APP_VERSION = "7.3.4"
+APP_VERSION = "7.3.5"
 OFFICIAL_MODEL = "gpt-6.1-sol"
 OFFICIAL_PROVIDER = "openai"
 API_PROVIDER = "funpay"

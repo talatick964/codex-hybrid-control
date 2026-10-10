@@ -14,5 +14,6 @@ def no_background_daemons_in_unit_tests(monkeypatch, tmp_path):
     monkeypatch.setattr(hybrid_api_guard, 'ensure_started', lambda core: None)
     import hybrid_proxy
     monkeypatch.setattr(hybrid_proxy,'read_user_bypass',lambda:'')
+    monkeypatch.setattr(hybrid_proxy,'read_system_proxy_enabled',lambda:False)
     monkeypatch.setattr(hybrid_proxy,'write_user_bypass',lambda value:None)
     monkeypatch.setattr(core,'_broadcast_environment_change',lambda:None)

@@ -14,4 +14,6 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r requirements-dev.txt
+      - run: npm install --global @openai/codex@0.160.0
+      - run: codex --version
       - run: python -m pytest -q

@@ -8,6 +8,46 @@ import pytest
 from hybrid_api_guard import server, ensure_started as start_guard
 
 
+@pytest.mark.parametrize('path,origin,stock,status',[
+    ('/wrong-access/v1/responses',None,False,403),
+    ('/local-test-secret/v1/responses','https://example.com',False,403),
+    ('/local-test-secret/v1/unexpected',None,False,403),
+    ('/local-test-secret/v1/responses',None,True,503),
+])
+def test_rejected_local_requests_never_reach_provider(tmp_path,path,origin,stock,status):
+    calls=[]
+    class Provider(BaseHTTPRequestHandler):
+        def log_message(self,*args):pass
+        def do_POST(self):
+            calls.append(self.path);self.send_response(500);self.end_headers()
+    upstream=ThreadingHTTPServer(('127.0.0.1',0),Provider)
+    core=SimpleNamespace(is_stock_mode=lambda:stock)
+    gateway=server(core,{'port':0,'access':'local-test-secret'},
+                   upstream=f'http://127.0.0.1:{upstream.server_port}/v1',timeout=1)
+    for value in [gateway,upstream]:threading.Thread(target=value.serve_forever,daemon=True).start()
+    connection=http.client.HTTPConnection('127.0.0.1',gateway.server_port,timeout=2)
+    try:
+        headers={'Content-Type':'application/json'}
+        if origin:headers['Origin']=origin
+        connection.request('POST',path,'{}',headers)
+        response=connection.getresponse();response.read()
+        assert response.status==status and calls==[]
+    finally:
+        connection.close()
+        for value in [gateway,upstream]:value.shutdown();value.server_close()
+
+
+def test_health_does_not_report_a_closed_port_as_healthy():
+    import socket
+    from hybrid_api_guard import health_info
+    with socket.socket() as reserved:
+        # A bound socket that never listens cannot be reused by another service.
+        reserved.bind(('127.0.0.1',0));port=reserved.getsockname()[1]
+        started=time.monotonic()
+        assert health_info({'port':port,'access':'test-access'})=={}
+        assert time.monotonic()-started<1.5
+
+
 def test_tool_cycle_uses_results_and_arguments_without_call_ids():
     from hybrid_api_guard import repeated_tool_call
     history=[]

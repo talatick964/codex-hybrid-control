@@ -106,7 +106,7 @@ def compatibility(core, config_path):
     provider = parsed.get('model_provider','openai')
     if not core.is_stock_mode():
         from hybrid_api_guard import healthy,load_settings
-        guard_error=None
+        guard_error=None;guard_settings={}
         try:
             guard_settings=load_settings(core)
             running=bool(guard_settings.get('enabled')) and healthy(guard_settings)
@@ -118,6 +118,21 @@ def compatibility(core, config_path):
             (guard_error or ('Локальный шлюз отвечает. Предел запроса 180 с, тишины 60 с. Текст выдаётся после проверки полного ответа.'
              if running else 'Шлюз не запущен. Выполните «Проверить и исправить всё».'))+
             (' Последний результат: '+str(last.get('status'))+'.' if last else '')))
+        from hybrid_proxy import loopback_status
+        routing=loopback_status()
+        steps.append(_step('Локальный маршрут и прокси','ok' if routing['ok'] else 'warning',
+            'Локальные адреса исключены из прокси текущего процесса.' if routing['ok'] and routing['proxy_present']
+            else 'Прокси в окружении и настройках Windows не обнаружен.' if routing['ok']
+            else 'Исключения сохранены, но текущий процесс использует старое окружение. Полностью перезапустите Codex и панель.' if routing['restart_required']
+            else 'Прокси может перехватывать локальный шлюз и возвращать 403. Выполните «Проверить и исправить всё», затем полностью перезапустите Codex.',
+            **routing))
+        provider_settings=parsed.get('model_providers',{}).get(core.API_PROVIDER,{})
+        if guard_settings.get('enabled') and provider_settings:
+            expected=f"http://127.0.0.1:{guard_settings['port']}/{guard_settings['access']}/v1"
+            matches=str(provider_settings.get('base_url','')).rstrip('/')==expected
+            steps.append(_step('Маршрут API-шлюза','ok' if matches else 'error',
+                'Адрес провайдера совпадает с текущим локальным шлюзом.' if matches
+                else 'Адрес провайдера устарел или отличается от текущего шлюза. Выполните «Проверить и исправить всё» и полностью перезапустите Codex.'))
     if not core.is_stock_mode():
         try:
             from hybrid_stop_guard import clean_hooks
@@ -329,7 +344,11 @@ def export_report(core, config_path, destination):
              'raw_content_included':False})
     data['log_summaries']=summaries
     errors=[s for source in [data['compatibility'],data['api']] for s in source.get('steps',[]) if s.get('status')=='error']
-    data['problem_layers']={'configuration':any(e['name'] in {'Конфигурация','Провайдер','Параметры запуска'} for e in errors),
-       'bridge':any(e['name'].startswith('hybrid') for e in errors),'provider':any(e in data['api'].get('steps',[]) for e in errors)}
+    local_issues=[s for s in data['compatibility'].get('steps',[])
+                  if s.get('status') in {'warning','error'} and s.get('name') in
+                  {'Локальный маршрут и прокси','Маршрут API-шлюза','Контроль активных API-запросов'}]
+    data['problem_layers']={'configuration':any(e['name'] in {'Конфигурация','Провайдер','Параметры запуска','Маршрут API-шлюза'} for e in errors),
+       'bridge':any(e['name'].startswith('hybrid') for e in errors),'provider':any(e in data['api'].get('steps',[]) for e in errors),
+       'local_connection':bool(local_issues)}
     core.write_json_atomic(Path(destination),redact(data,(key,)))
     return {'ok':True,'path':str(destination),'raw_logs_included':False}
