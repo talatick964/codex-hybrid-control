@@ -1,5 +1,7 @@
 # Установка
 
+Готовый ZIP есть также **[в Telegram](https://t.me/aislopprogs/10)**.
+
 ## Готовая программа
 
 Нужны **Windows, установленный Codex с CLI и собственный API-ключ**. Поддерживаемый протокол провайдера — Responses API.
@@ -41,3 +43,34 @@ powershell -NoProfile -ExecutionPolicy Bypass -File build_exe.ps1 -PythonExecuta
 ```
 
 Готовые файлы появятся в `dist`. Проверки: `python -m pytest tests -q` после установки `requirements-dev.txt`. Подробности защиты — в [FIX-7.3.2.md](../FIX-7.3.2.md).
+
+
+---
+
+<a id="english"></a>
+
+## English
+
+**Requirements:** Windows, Codex with its CLI, your own API key, and a Responses-compatible provider. No Python is needed for the packaged app. The app interface is currently in Russian.
+
+1. Download the ZIP from [GitHub](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.2-Windows.zip) or [Telegram](https://t.me/aislopprogs/10).
+2. Extract it and run **Codex-Hybrid-Control.exe**.
+3. Open **«Подключение API»** (API connection), enter your key and choose a model. Create a connection profile for a different provider.
+4. Review the preview, click **«Применить»** (Apply), then **«Проверить и исправить всё»** (Check and repair everything).
+5. Open `/hooks` in Codex CLI and trust the Hybrid Control handler if needed. Restart Codex and start a new session.
+
+**Updating:** close the old panel, extract the new version and run the repair check. Restart Codex. Your settings are stored locally, separately from the app.
+
+**Standard Codex:** open **«Восстановление»** (Recovery) to disable or restore Hybrid Control, then restart Codex.
+
+**Need help?** Use [Issues](https://github.com/talatick964/codex-hybrid-control/issues/new/choose) or [Discussions](https://github.com/talatick964/codex-hybrid-control/discussions). Include your version and steps to reproduce; never post keys or private logs.
+
+**Build an EXE:**
+
+```powershell
+python -m venv .build-venv
+.build-venv/Scripts/python.exe -m pip install -r requirements-build.txt
+powershell -NoProfile -ExecutionPolicy Bypass -File build_exe.ps1 -PythonExecutable .build-venv/Scripts/python.exe
+```
+
+The output is in `dist`. See the [English quick start](../README.md#english) for running from source.
