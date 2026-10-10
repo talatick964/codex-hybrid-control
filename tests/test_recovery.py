@@ -162,12 +162,13 @@ def test_result_refreshes_supervisor_status_without_list_call(home):
 
 def test_worker_launch_includes_independent_supervisor(home,monkeypatch):
     from types import SimpleNamespace
-    commands=[]
+    commands=[];environments=[]
     def popen(command,**kwargs):
-        commands.append(command);return SimpleNamespace(pid=98765)
+        commands.append(command);environments.append(kwargs.get('env'));return SimpleNamespace(pid=98765)
     monkeypatch.setattr(c.subprocess,'Popen',popen)
     row=c.launch_api_worker('opus',home,'test-only prompt',timeout_seconds=45)
     command=commands[0]
     assert '--supervise-worker' in command and '45' in command
     assert '--sandbox' in command and 'workspace-write' in command
     assert row['pid_kind']=='supervisor' and row['result_path'].endswith('.result.json')
+    assert {'127.0.0.1','localhost','::1'} <= set(environments[0]['NO_PROXY'].split(','))

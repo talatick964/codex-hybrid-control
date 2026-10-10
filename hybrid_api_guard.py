@@ -454,6 +454,8 @@ def ensure_started(core):
 
 def install(core):
     if core.is_stock_mode():return 'Отключено в обычном Codex'
+    from hybrid_proxy import repair_loopback_proxy
+    repair_loopback_proxy(core)
     path=core.control_dir()/'api-guard.json'
     from hybrid_storage import file_transaction
     with file_transaction(core.control_dir()/'api-guard-start.lock'):
@@ -475,7 +477,7 @@ def install(core):
                 from hybrid_recovery import write_bytes
                 write_bytes(core,path,original)
             raise
-    return 'Контроль API активен: максимум 180 секунд на запрос, 60 секунд тишины; без воспроизведения инструментов'
+    return 'Контроль API активен: максимум 180 секунд на запрос, 60 секунд тишины; без воспроизведения инструментов. Локальный адрес исключён из прокси; полностью перезапустите Codex.'
 
 
 def main():

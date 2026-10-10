@@ -33,7 +33,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
 APP_TITLE = "Codex Hybrid Control — Центр управления"
-APP_VERSION = "7.3.3"
+APP_VERSION = "7.3.4"
 OFFICIAL_MODEL = "gpt-6.1-sol"
 OFFICIAL_PROVIDER = "openai"
 API_PROVIDER = "funpay"
@@ -1691,6 +1691,7 @@ def launch_api_worker(profile: str, project: Path, prompt: str, label: str = "",
         startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startup.wShowWindow = 0
     log_fh = log.open("w", encoding="utf-8", buffering=1)
+    from hybrid_proxy import child_environment
     try:
         proc = subprocess.Popen(
             cmd,
@@ -1701,6 +1702,7 @@ def launch_api_worker(profile: str, project: Path, prompt: str, label: str = "",
             creationflags=flags,
             startupinfo=startup,
             text=True,
+            env=child_environment(),
         )
     except Exception:
         log_fh.close()

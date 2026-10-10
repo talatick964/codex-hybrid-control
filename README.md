@@ -4,7 +4,7 @@
   <h1>Codex Hybrid Control</h1>
   <p><b>Твой API. Настоящий Codex. Одна удобная панель.</b></p>
   <p>Подключения · агенты · управление Windows и браузером · восстановление</p>
-  <a href="https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.3-Windows.zip"><img src="https://img.shields.io/badge/Скачать_для_Windows-7.3.3-aed5fc?style=for-the-badge&labelColor=18212e" alt="Скачать для Windows"></a>
+  <a href="https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.4-Windows.zip"><img src="https://img.shields.io/badge/Скачать_для_Windows-7.3.4-aed5fc?style=for-the-badge&labelColor=18212e" alt="Скачать для Windows"></a>
   <a href="https://t.me/aislopprogs"><img src="https://img.shields.io/badge/Telegram-АИслоп-93b8ea?style=for-the-badge&logo=telegram&logoColor=white&labelColor=18212e" alt="Telegram"></a>
   <p><a href="docs/INSTALL.md">Как установить</a> · <a href="https://github.com/talatick964/codex-hybrid-control/issues/new/choose">Сообщить об ошибке</a> · <a href="https://github.com/talatick964/codex-hybrid-control/releases">Все версии</a></p>
 </div>
@@ -19,7 +19,7 @@
 
 Нужны **Windows, установленный Codex с CLI и свой API-ключ**. Провайдер должен поддерживать Responses API. Python для готовой программы не нужен.
 
-1. [Скачай ZIP](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.3-Windows.zip), распакуй и запусти **Codex-Hybrid-Control.exe**.
+1. [Скачай ZIP](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.4-Windows.zip), распакуй и запусти **Codex-Hybrid-Control.exe**.
 2. В **«Подключение API»** добавь ключ и выбери модель.
 3. Посмотри изменения, нажми **«Применить»**, затем **«Проверить и исправить всё»**.
 4. В Codex CLI открой `/hooks`: подтверди обработчик Hybrid Control, если он ещё не доверенный. Перезапусти Codex и создай новый сеанс.
@@ -43,7 +43,7 @@
 <img src="docs/assets/computer.png" alt="Настройки управления компьютером" width="100%">
 </details>
 
-Проверено: **202 теста**, готовые EXE, управление Windows и отдельной сессией Edge. [Отчёт](docs/VERIFY.md) · [Что нового](CHANGELOG.md) · [Исходники и сборка](docs/INSTALL.md#из-исходников).
+Проверено: **205 тестов**, готовые EXE, управление Windows и отдельной сессией Edge. [Отчёт](docs/VERIFY.md) · [Что нового](CHANGELOG.md) · [Исходники и сборка](docs/INSTALL.md#из-исходников).
 
 Контроль API помогает восстановиться после сбоев, но не гарантирует исправность любого провайдера. [Возможности и ограничения](docs/FEATURES.md).
 
@@ -63,7 +63,7 @@ ZIP с готовой программой можно скачать и **[пр�
 
 Codex Hybrid Control configures your installed Codex to use your own API provider. Switch providers and models, connect external agents and local tools, diagnose problems, or restore standard Codex settings. The Windows app currently has a Russian interface.
 
-**[Download for Windows](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.3-Windows.zip) · [Download from Telegram](https://t.me/aislopprogs/10) · [Report a bug](https://github.com/talatick964/codex-hybrid-control/issues/new/choose)**
+**[Download for Windows](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.4-Windows.zip) · [Download from Telegram](https://t.me/aislopprogs/10) · [Report a bug](https://github.com/talatick964/codex-hybrid-control/issues/new/choose)**
 
 ### Quick start
 
@@ -85,7 +85,7 @@ You need **Windows, Codex with its CLI, and your own API key**. Your provider mu
 | One-click repair | Check and restore the components |
 | Standard Codex mode | Reversibly disable Hybrid Control |
 
-**202 tests passed locally**, including packaged EXEs, Windows controls and a separate Edge session. API safeguards cannot guarantee that every provider or model will work correctly.
+**205 tests passed locally**, including packaged EXEs, Windows controls and a separate Edge session. API safeguards cannot guarantee that every provider or model will work correctly.
 
 ### Build from source
 
