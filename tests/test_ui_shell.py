@@ -67,6 +67,9 @@ def test_stock_ui_cannot_reenable_integrations(app,monkeypatch):
     app.open_worker_center()
     assert 'отключены' in app.status.get()
     assert app.hero_title.cget('text') == 'Обычный Codex'
+    assert 'отключены' in app.workers_label.cget('text')
+    assert 'отключены намеренно' in app.worker_bridge_label.cget('text')
+    assert 'НУЖНО ВОССТАНОВЛЕНИЕ' not in app.worker_bridge_label.cget('text')
 
 
 def test_browser_fetch_runs_off_ui_thread_and_renders_links(app,monkeypatch):

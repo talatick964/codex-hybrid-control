@@ -335,6 +335,12 @@ def install(core):
         self.activate_button.configure(text='Сохранить и настроить')
         if stock:
             import hybrid_recovery
+            self.key_label.configure(text='● API-ключ: сохранён, в обычном Codex не используется' if core.user_api_key_present() else '● API-ключ: не задан, для обычного Codex не требуется',fg=self.MUTED)
+            self.workers_label.configure(text='● API-агенты: отключены в режиме «Обычный Codex»',fg=self.MUTED)
+            self.worker_bridge_label.configure(text='● Делегирование и мосты Hybrid Control: отключены намеренно',fg=self.MUTED)
+            self.catalog_label.configure(text='● Каталог API-моделей: сохранён, в обычном Codex не используется',fg=self.MUTED)
+            self.worker_summary_label.configure(text='API-агенты отключены',fg=self.MUTED)
+            for item in self.worker_cards.values():item.configure(text='ОТКЛЮЧЁН · ОБЫЧНЫЙ CODEX',fg=self.MUTED)
             phase=hybrid_recovery.stock_state(core).get('phase','stock')
             self.hero_title.configure(text='Обычный Codex')
             self.hero_subtitle.configure(text='Настройки Hybrid Control отключены. Снимок доступен в разделе восстановления.')

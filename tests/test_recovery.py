@@ -51,6 +51,44 @@ def test_restore_refuses_to_overwrite_new_user_edits(home):
     assert c.is_stock_mode()
 
 
+def test_rotated_codex_pipe_does_not_block_restore_and_new_path_survives(home):
+    config=c.default_config_path()
+    text=c.patch_table_keys(config.read_text(encoding='utf-8'),'mcp_servers.node_repl.env',
+                           {'SKY_CUA_NATIVE_PIPE_DIRECTORY':'"old-runtime-pipe"'})
+    config.write_text(text,encoding='utf-8')
+    original=c.validate_toml(text)
+    c.enter_stock_mode(config)
+    config.write_text(c.patch_table_keys(config.read_text(encoding='utf-8'),'mcp_servers.node_repl.env',
+                      {'SKY_CUA_NATIVE_PIPE_DIRECTORY':'"new-runtime-pipe"'}),encoding='utf-8')
+    result=c.repair_all(config)
+    assert result['ok'] and 'служебный путь' in result['steps'][-1]['detail']
+    assert c.is_stock_mode()
+    c.restore_hybrid_mode(config)
+    original['mcp_servers']['node_repl']['env']['SKY_CUA_NATIVE_PIPE_DIRECTORY']='new-runtime-pipe'
+    assert c.validate_toml(config.read_text(encoding='utf-8'))==original
+    assert not c.is_stock_mode()
+
+
+def test_rotated_pipe_does_not_hide_other_config_edits(home):
+    config=c.default_config_path()
+    config.write_text(c.patch_table_keys(config.read_text(encoding='utf-8'),'mcp_servers.node_repl.env',
+                      {'SKY_CUA_NATIVE_PIPE_DIRECTORY':'"old-pipe"'}),encoding='utf-8')
+    c.enter_stock_mode(config)
+    changed=c.patch_table_keys(config.read_text(encoding='utf-8'),'mcp_servers.node_repl.env',
+                             {'SKY_CUA_NATIVE_PIPE_DIRECTORY':'"new-pipe"'})+'\n# user edit\n'
+    config.write_text(changed,encoding='utf-8')
+    assert not c.repair_all(config)['ok']
+    with pytest.raises(RuntimeError,match='изменены файлы'):c.restore_hybrid_mode(config)
+    assert config.read_text(encoding='utf-8')==changed
+
+
+def test_stock_check_explains_that_api_restore_is_separate(home):
+    config=c.default_config_path();c.enter_stock_mode(config)
+    result=c.repair_all(config)
+    assert result['ok']
+    assert 'Восстановить Hybrid' in result['steps'][-1]['detail']
+
+
 def test_stock_failure_rolls_back_every_touched_file(home,monkeypatch):
     config=c.default_config_path()
     paths=recovery.managed_paths(c,config)

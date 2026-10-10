@@ -108,6 +108,39 @@ def managed_paths(core,config):
             *[core.codex_dir()/f'{name}.config.toml' for name in core.WORKER_PROFILES]]
 
 
+def restore_candidate(core, path, row, current, config_path):
+    """Preserve a rotated Codex pipe path; reject every other changed byte."""
+    before=base64.b64decode(row['before'],validate=True) if row.get('before') is not None else None
+    if digest(current)==row.get('stock_hash'):
+        return before
+    if Path(path).resolve()!=Path(config_path).resolve() or before is None or current is None:
+        raise ValueError('Changed file')
+    bom=b'\xef\xbb\xbf' if before.startswith(b'\xef\xbb\xbf') else b''
+    original=before.decode('utf-8-sig')
+    baseline=clean_config(core,original)
+    if digest(bom+baseline.encode('utf-8'))!=row.get('stock_hash'):
+        raise ValueError('Unknown stock baseline')
+    text=current.decode('utf-8-sig')
+    table='mcp_servers.node_repl.env'
+    key='SKY_CUA_NATIVE_PIPE_DIRECTORY'
+    def pipe_value(source):
+        value=core.validate_toml(source).get('mcp_servers',{}).get('node_repl',{}).get('env',{}).get(key)
+        if not isinstance(value,str) or not value:
+            raise ValueError('Missing pipe path')
+        return value
+    pipe_value(baseline)
+    value=pipe_value(text)
+    marker={key:core._toml_string('hybrid-compare-pipe-path')}
+    if core.patch_table_keys(text,table,marker)!=core.patch_table_keys(baseline,table,marker):
+        raise ValueError('Other config edits')
+    result=core.patch_table_keys(original,table,{key:core._toml_string(value)})
+    expected=copy.deepcopy(core.validate_toml(original))
+    expected['mcp_servers']['node_repl']['env'][key]=value
+    if core.validate_toml(result)!=expected:
+        raise ValueError('Pipe patch changed other settings')
+    return bom+result.encode('utf-8')
+
+
 def enter_stock_mode(core,config_path):
     with _LOCK, file_transaction(core.control_dir()/'settings.lock'), file_transaction(core.control_dir()/'recovery.lock'):
         config_path=Path(config_path).resolve()
@@ -174,8 +207,11 @@ def restore_hybrid_mode(core,config_path):
         current={path:read_bytes(Path(path)) for path in files}
         restored={path:base64.b64decode(row['before'],validate=True) if row.get('before') is not None else None for path,row in files.items()}
         interrupted=state.get('phase') in {'disabling','restoring'}
-        conflicts=[Path(path).name for path,row in files.items() if digest(current[path])!=row.get('stock_hash')
-                   and not (interrupted and digest(current[path])==digest(restored[path]))]
+        conflicts=[]
+        for path,row in files.items():
+            if interrupted and digest(current[path])==digest(restored[path]):continue
+            try:restored[path]=restore_candidate(core,path,row,current[path],config_path)
+            except (ValueError,UnicodeError,TypeError,KeyError):conflicts.append(Path(path).name)
         if conflicts:raise RuntimeError('После отключения изменены файлы: '+', '.join(conflicts)+'. Возврат остановлен, чтобы не потерять изменения. Снимок сохранён.')
         core.validate_toml(restored[str(Path(config_path).resolve())].decode('utf-8-sig'))
         written=[]
@@ -205,9 +241,17 @@ def repair_all(core,config_path):
         if is_stock_mode(core):
             step('Обычный Codex',lambda:core.validate_toml(config_path.read_text(encoding='utf-8-sig')) and 'Конфигурация корректна' or 'Конфигурация корректна')
             state=stock_state(core)
-            changed=[Path(path).name for path,row in state.get('files',{}).items() if digest(read_bytes(Path(path)))!=row.get('stock_hash')]
+            changed=[];compatible=[]
+            for path,row in state.get('files',{}).items():
+                current=read_bytes(Path(path))
+                if digest(current)==row.get('stock_hash'):continue
+                try:restore_candidate(core,path,row,current,config_path)
+                except (ValueError,UnicodeError,TypeError,KeyError):changed.append(Path(path).name)
+                else:compatible.append(Path(path).name)
             steps.append({'name':'Hybrid Control','status':'warning' if changed else 'ok',
-                          'detail':'После отключения изменены: '+', '.join(changed) if changed else 'Отключён. Интеграции не устанавливались.'})
+                          'detail':('После отключения изменены: '+', '.join(changed)+'. Автоматический возврат остановлен, чтобы сохранить эти изменения.' if changed else
+                                    'Отключён намеренно. Для работы через API нажмите «Восстановить Hybrid».'+
+                                    (' Обновлённый служебный путь Codex будет сохранён при восстановлении.' if compatible else ''))})
             return {'ok':all(s['status']=='ok' for s in steps),'steps':steps}
         # Never replace a broken user config with defaults and lose unknown settings.
         if config_path.exists() and not step('Синтаксис конфигурации',lambda:core.validate_toml(config_path.read_text(encoding='utf-8-sig')) and 'Корректен' or 'Корректен'):

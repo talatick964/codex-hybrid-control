@@ -6,7 +6,7 @@
 
 Нужны **Windows, установленный Codex с CLI и собственный API-ключ**. Поддерживаемый протокол провайдера — Responses API.
 
-1. [Скачай ZIP для Windows](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.2-Windows.zip).
+1. [Скачай ZIP для Windows](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.3-Windows.zip).
 2. Распакуй архив в обычную папку. Запусти **Codex-Hybrid-Control.exe** — Python не нужен.
 3. Открой **«Подключение API»**, укажи ключ и выбери модель. Для другого провайдера создай профиль с его адресом.
 4. Посмотри изменения, нажми **«Применить»**, затем **«Проверить и исправить всё»**.
@@ -14,7 +14,7 @@
 
 ## Обновление
 
-Закрой старую панель, распакуй новую и запусти её. Нажми **«Проверить и исправить всё»**, затем перезапусти Codex. Ключи и настройки хранятся локально, отдельно от программы.
+Закрой старую панель, распакуй новую и запусти её. Если включён «Обычный Codex», сначала нажми **«Восстановить Hybrid»**. Затем нажми **«Проверить и исправить всё»** и перезапусти Codex. Ключи и настройки хранятся локально, отдельно от программы.
 
 ## Вернуться к обычному Codex
 
@@ -42,7 +42,7 @@ python -m venv .build-venv
 powershell -NoProfile -ExecutionPolicy Bypass -File build_exe.ps1 -PythonExecutable .build-venv/Scripts/python.exe
 ```
 
-Готовые файлы появятся в `dist`. Проверки: `python -m pytest tests -q` после установки `requirements-dev.txt`. Подробности защиты — в [FIX-7.3.2.md](../FIX-7.3.2.md).
+Готовые файлы появятся в `dist`. Проверки: `python -m pytest tests -q` после установки `requirements-dev.txt`. Подробности защиты — в [FIX-7.3.3.md](../FIX-7.3.3.md).
 
 
 ---
@@ -53,13 +53,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File build_exe.ps1 -PythonExecuta
 
 **Requirements:** Windows, Codex with its CLI, your own API key, and a Responses-compatible provider. No Python is needed for the packaged app. The app interface is currently in Russian.
 
-1. Download the ZIP from [GitHub](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.2-Windows.zip) or [Telegram](https://t.me/aislopprogs/10).
+1. Download the ZIP from [GitHub](https://github.com/talatick964/codex-hybrid-control/releases/latest/download/Codex-Hybrid-Control-7.3.3-Windows.zip) or [Telegram](https://t.me/aislopprogs/10).
 2. Extract it and run **Codex-Hybrid-Control.exe**.
 3. Open **«Подключение API»** (API connection), enter your key and choose a model. Create a connection profile for a different provider.
 4. Review the preview, click **«Применить»** (Apply), then **«Проверить и исправить всё»** (Check and repair everything).
 5. Open `/hooks` in Codex CLI and trust the Hybrid Control handler if needed. Restart Codex and start a new session.
 
-**Updating:** close the old panel, extract the new version and run the repair check. Restart Codex. Your settings are stored locally, separately from the app.
+**Updating:** close the old panel and extract the new version. If Standard Codex mode is enabled, click **«Восстановить Hybrid»** (Restore Hybrid) first. Run the repair check and restart Codex. Your settings are stored locally, separately from the app.
 
 **Standard Codex:** open **«Восстановление»** (Recovery) to disable or restore Hybrid Control, then restart Codex.
 
